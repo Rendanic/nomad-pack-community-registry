@@ -10,6 +10,13 @@ job [[ template "job_name" . ]] {
   group "promtail" {
     network {
       mode = [[ .promtail.promtail_group_network.mode | quote ]]
+      [[- if .promtail.promtail_group_network.dns ]]
+      dns {
+      [[- range $label, $to := .promtail.promtail_group_network.dns ]]
+          [[ $label ]] = [[ $to | toPrettyJson ]]
+      [[- end ]]
+      }
+      [[- end ]]
       [[- range $label, $to := .promtail.promtail_group_network.ports ]]
       port [[ $label | quote ]] {
         to = [[ $to ]]
@@ -27,7 +34,11 @@ job [[ template "job_name" . ]] {
       template {
         destination = "local/promtail-config.yaml"
         data = <<-EOT
+[[- if .promtail.promtail_custom_config ]]
+[[ .promtail.promtail_custom_config ]]
+[[- else ]]
 [[ template "promtail_config" . ]]
+[[- end ]]
         EOT
       }
 
@@ -44,7 +55,8 @@ job [[ template "job_name" . ]] {
           bind_options { propagation = "rshared" }
         }
 
-        [[- if (eq .promtail.config_file "") ]]
+        [[- if .promtail.promtail_custom_config ]]
+        [[- else ]]
         [[ template "mounts" .promtail.default_mounts ]]
         [[- end ]]
 

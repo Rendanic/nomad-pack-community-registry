@@ -29,8 +29,8 @@ variable "version_tag" {
   default     = "latest"
 }
 
-variable "config_file" {
-  description = "Path to custom Promtail configuration file."
+variable "promtail_custom_config" {
+  description = "Custom Promtail configuration."
   type        = string
   default     = ""
 }
@@ -69,12 +69,14 @@ variable "promtail_group_network" {
   type = object({
     mode  = string
     ports = map(number)
+    dns = map(list(string))
   })
   default = {
     mode = "bridge",
     ports = {
       "http" = 9090,
     },
+    dns = {}
   }
 }
 
