@@ -19,17 +19,34 @@ job [[ template "job_name" . ]] {
       mode = "bridge"
 
       port "http" {
+        static = [[ .loki.http_port ]]
         to = [[ .loki.http_port ]]
       }
 
       port "grpc" {
         to = [[ .loki.grpc_port ]]
       }
+
+      [[- if .loki.dns ]]
+      dns {
+        [[- if .loki.dns.source ]]
+          servers = [[ .loki.dns.source | toPrettyJson ]]
+        [[- end ]]
+        [[- if .loki.dns.searches ]]
+          searches = [[ .loki.dns.searches | toPrettyJson ]]
+        [[- end ]]
+        [[- if .loki.dns.options ]]
+          options = [[ .loki.dns.options | toPrettyJson ]]
+        [[- end ]]
+      }
+      [[- end ]]
+
     }
 
     service {
       name = "loki"
       port = "[[ .loki.http_port ]]"
+      tags = [[ .loki.consul_tags | toPrettyJson ]]
 
       connect {
         sidecar_service {}
