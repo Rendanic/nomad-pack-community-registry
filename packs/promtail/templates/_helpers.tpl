@@ -57,9 +57,6 @@ region = [[ .promtail.region | quote]]
           - source_labels:
             - __journal_syslog_identifier
             target_label: syslog_identifier
-[[- else ]]
-[[ $config := .promtail.config_file ]][[ fileContents $config ]]
-[[- end ]]
 [[- end -]]
 
 // Generic "service" block template
@@ -68,7 +65,7 @@ region = [[ .promtail.region | quote]]
     service {
       name = [[ $service.service_name | quote ]]
       port = [[ $service.service_port_label | quote ]]
-      tags = [[ $service.service_tags | toStringList ]]
+      tags = [[ $service.service_tags | toPrettyJson ]]
       [[- if gt (len $service.upstreams) 0 ]] 
       connect {
         sidecar_service {

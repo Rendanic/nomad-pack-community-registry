@@ -29,10 +29,10 @@ variable "version_tag" {
   default     = "latest"
 }
 
-variable "config_file" {
-  description = "Path to custom Promtail configuration file."
+variable "promtail_custom_config" {
+  description = "Custom Promtail configuration."
   type        = string
-  default     = ""
+  default     = null
 }
 
 // Default config options used when no config file is specified
@@ -69,12 +69,14 @@ variable "promtail_group_network" {
   type = object({
     mode  = string
     ports = map(number)
+    dns = map(list(string))
   })
   default = {
     mode = "bridge",
     ports = {
       "http" = 9090,
     },
+    dns = {}
   }
 }
 
@@ -113,7 +115,7 @@ variable "resources" {
   })
   default = {
     cpu    = 200,
-    memory = 256
+    memory = 128
   }
 }
 
@@ -122,7 +124,6 @@ variable "container_args" {
   type        = list(string)
   default = [
     "-config.file=/etc/promtail/promtail-config.yaml",
-    "-log.level=info"
   ]
 }
 
@@ -138,7 +139,41 @@ variable "extra_mounts" {
       value = string
     }))
   }))
-  default = []
+  default = [
+    {
+      type     = "bind"
+      target   = "/var/log/journal"
+      source   = "/var/log/journal"
+      readonly = true
+      bind_options = [
+        {
+          name  = "propagation"
+          value = "rshared"
+        },
+      ]
+    },
+    {
+      type     = "bind"
+      target   = "/etc/machine-id"
+      source   = "/etc/machine-id"
+      readonly = false
+      bind_options = [
+        {
+          name  = "propagation",
+          value = "rshared"
+        },
+      ]
+    }
+  ]
+}
+
+variable "volume" {
+  description = "Volumes for promtail"
+  type = object({
+    type    = string
+    source = string
+  })
+  default = null
 }
 
 variable "default_mounts" {

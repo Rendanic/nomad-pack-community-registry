@@ -2,11 +2,13 @@
 
 [Promtail](https://grafana.com/docs/loki/latest/clients/promtail/) is an agent which ships the contents of local logs to a private Loki instance or [Grafana Cloud](https://grafana.com/oss/loki). It is usually deployed to every machine that has applications needed to be monitored.
 
-This pack deploys Promtail as a Nomad [System Job](https://www.nomadproject.io/docs/schedulers#system) using the `grafana/promtail` Docker image and Consul Service named "promtail".
+This pack deploys Promtail as a Nomad [System Job](https://www.nomadproject.io/docs/schedulers#system) using the `grafana/promtail` Docker image and Consul Service named "promtail". It reads journald and job logfiles from nomad and send them to loki
 
 ## Dependencies
 
 This pack requires Linux clients to run properly.
+
+Do not forget to set `client_urls` or use a custom configuration with `promtail_custom_config`.
 
 ## Configuration
 

@@ -10,6 +10,13 @@ job [[ template "job_name" . ]] {
   group "promtail" {
     network {
       mode = [[ .promtail.promtail_group_network.mode | quote ]]
+      [[- if .promtail.promtail_group_network.dns ]]
+      dns {
+      [[- range $label, $to := .promtail.promtail_group_network.dns ]]
+          [[ $label ]] = [[ $to | toPrettyJson ]]
+      [[- end ]]
+      }
+      [[- end ]]
       [[- range $label, $to := .promtail.promtail_group_network.ports ]]
       port [[ $label | quote ]] {
         to = [[ $to ]]
@@ -17,17 +24,41 @@ job [[ template "job_name" . ]] {
       [[- end ]]
     }
 
+    [[- if .promtail.volume ]]
+    volume "promtail_nomad" {
+      type = [[ .promtail.volume.type | quote ]]
+      read_only = true
+      source = [[ .promtail.volume.source | quote ]]
+    }
+    [[- end ]]
+
     [[- if .promtail.promtail_task_services ]]
     [[ template "service" .promtail.promtail_group_services ]]
     [[- end ]]
 
     task "promtail" {
       driver = "docker"
-      
+
+    [[- if .promtail.volume ]]
+      volume_mount {
+        volume      = "promtail_nomad"
+        destination = "/hashicorp/nomad"
+        read_only   = true
+      }
+    [[- end ]]
+
+      env {
+        HOSTNAME = "${attr.unique.hostname}"
+      }
+
       template {
         destination = "local/promtail-config.yaml"
         data = <<-EOT
+[[- if .promtail.promtail_custom_config ]]
+[[ .promtail.promtail_custom_config ]]
+[[- else ]]
 [[ template "promtail_config" . ]]
+[[- end ]]
         EOT
       }
 
@@ -44,7 +75,8 @@ job [[ template "job_name" . ]] {
           bind_options { propagation = "rshared" }
         }
 
-        [[- if (eq .promtail.config_file "") ]]
+        [[- if .promtail.promtail_custom_config ]]
+        [[- else ]]
         [[ template "mounts" .promtail.default_mounts ]]
         [[- end ]]
 
