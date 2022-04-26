@@ -30,7 +30,9 @@ region = [[ .promtail.region | quote]]
 
 // Use provided config file if defined, else render a default
 [[- define "promtail_config" -]]
-[[- if (eq .promtail.config_file "") ]]
+[[- if .promtail.custom_config  ]]
+[[ .promtail.custom_config ]]
+[[- else ]]
         server:
           http_listen_port: [[ .promtail.http_port ]]
           log_level: [[ .promtail.log_level ]]
@@ -57,6 +59,7 @@ region = [[ .promtail.region | quote]]
           - source_labels:
             - __journal_syslog_identifier
             target_label: syslog_identifier
+[[- end -]]
 [[- end -]]
 
 // Generic "service" block template

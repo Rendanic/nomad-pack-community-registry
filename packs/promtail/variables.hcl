@@ -29,7 +29,7 @@ variable "version_tag" {
   default     = "latest"
 }
 
-variable "promtail_custom_config" {
+variable "custom_config" {
   description = "Custom Promtail configuration."
   type        = string
   default     = null

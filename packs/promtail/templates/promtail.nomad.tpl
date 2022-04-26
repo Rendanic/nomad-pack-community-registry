@@ -54,11 +54,7 @@ job [[ template "job_name" . ]] {
       template {
         destination = "local/promtail-config.yaml"
         data = <<-EOT
-[[- if .promtail.promtail_custom_config ]]
-[[ .promtail.promtail_custom_config ]]
-[[- else ]]
 [[ template "promtail_config" . ]]
-[[- end ]]
         EOT
       }
 
@@ -75,7 +71,7 @@ job [[ template "job_name" . ]] {
           bind_options { propagation = "rshared" }
         }
 
-        [[- if .promtail.promtail_custom_config ]]
+        [[- if .promtail.custom_config ]]
         [[- else ]]
         [[ template "mounts" .promtail.default_mounts ]]
         [[- end ]]
