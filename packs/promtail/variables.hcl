@@ -127,6 +127,12 @@ variable "container_args" {
   ]
 }
 
+variable "log_level" {
+  description = "log_level of promtail"
+  type        = string
+  default = "info"
+}
+
 variable "extra_mounts" {
   description = "Additional mounts to create in the Promtail container"
   type = list(object({
@@ -139,41 +145,7 @@ variable "extra_mounts" {
       value = string
     }))
   }))
-  default = [
-    {
-      type     = "bind"
-      target   = "/var/log/journal"
-      source   = "/var/log/journal"
-      readonly = true
-      bind_options = [
-        {
-          name  = "propagation"
-          value = "rshared"
-        },
-      ]
-    },
-    {
-      type     = "bind"
-      target   = "/etc/machine-id"
-      source   = "/etc/machine-id"
-      readonly = false
-      bind_options = [
-        {
-          name  = "propagation",
-          value = "rshared"
-        },
-      ]
-    }
-  ]
-}
-
-variable "volume" {
-  description = "Volumes for promtail"
-  type = object({
-    type    = string
-    source = string
-  })
-  default = null
+  default = []
 }
 
 variable "default_mounts" {

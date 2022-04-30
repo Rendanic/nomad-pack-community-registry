@@ -24,28 +24,12 @@ job [[ template "job_name" . ]] {
       [[- end ]]
     }
 
-    [[- if .promtail.volume ]]
-    volume "promtail_nomad" {
-      type = [[ .promtail.volume.type | quote ]]
-      read_only = true
-      source = [[ .promtail.volume.source | quote ]]
-    }
-    [[- end ]]
-
     [[- if .promtail.promtail_task_services ]]
     [[ template "service" .promtail.promtail_group_services ]]
     [[- end ]]
 
     task "promtail" {
       driver = "docker"
-
-    [[- if .promtail.volume ]]
-      volume_mount {
-        volume      = "promtail_nomad"
-        destination = "/hashicorp/nomad"
-        read_only   = true
-      }
-    [[- end ]]
 
       env {
         HOSTNAME = "${attr.unique.hostname}"
