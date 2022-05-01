@@ -51,6 +51,15 @@ variable "grpc_port" {
   default     = 9095
 }
 
+variable "dns" {
+  description = ""
+  type = object({
+    servers   = list(string)
+    searches = list(string)
+    options = list(string)
+  })
+}
+
 variable "resources" {
   description = "The resource to assign to the Loki service task."
   type = object({
@@ -73,4 +82,18 @@ variable "rules_yaml" {
   description = "The Loki rules to pass to the task."
   type        = string
   default     = ""
+}
+
+variable "consul_tags" {
+  description = ""
+  type = list(string)
+  default = []
+}
+
+variable "volume" {
+  description = "The Volume for Grafana Loki data"
+  type = object({
+    type    = string
+    source = string
+  })
 }

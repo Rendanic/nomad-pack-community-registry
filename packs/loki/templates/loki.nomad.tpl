@@ -1,6 +1,6 @@
 job [[ template "job_name" . ]] {
   [[ template "region" . ]]
-  datacenters = [[ .loki.datacenters | toStringList ]]
+  datacenters = [[ .loki.datacenters | toPrettyJson ]]
 
   [[ if .loki.constraints ]][[ range $idx, $constraint := .loki.constraints ]]
   constraint {
@@ -25,19 +25,59 @@ job [[ template "job_name" . ]] {
       port "grpc" {
         to = [[ .loki.grpc_port ]]
       }
+
+      [[- if .loki.dns ]]
+      dns {
+        [[- if .loki.dns.source ]]
+          servers = [[ .loki.dns.source | toPrettyJson ]]
+        [[- end ]]
+        [[- if .loki.dns.searches ]]
+          searches = [[ .loki.dns.searches | toPrettyJson ]]
+        [[- end ]]
+        [[- if .loki.dns.options ]]
+          options = [[ .loki.dns.options | toPrettyJson ]]
+        [[- end ]]
+      }
+      [[- end ]]
+
     }
+
+    [[- if .loki.volume ]]
+    volume "loki" {
+      type = [[ .loki.volume.type | quote ]]
+      read_only = false
+      source = [[ .loki.volume.source | quote ]]
+    }
+    [[- end ]]
 
     service {
       name = "loki"
       port = "[[ .loki.http_port ]]"
+      tags = [[ .loki.consul_tags | toPrettyJson ]]
 
       connect {
         sidecar_service {}
+      }
+      check {
+        name     = "Loki HTTP"
+        type     = "http"
+        path     = "/ready"
+        interval = "5s"
+        timeout  = "5s"
       }
     }
 
     task "loki" {
       driver = "docker"
+
+    [[- if .loki.volume ]]
+
+      volume_mount {
+        volume      = "loki"
+        destination = "/loki"
+        read_only   = false
+      }
+    [[- end ]]
 
       config {
         image = "grafana/loki:[[ .loki.version_tag ]]"
