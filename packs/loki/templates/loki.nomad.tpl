@@ -58,13 +58,13 @@ job [[ template "job_name" . ]] {
       connect {
         sidecar_service {}
       }
-      check {
-        name     = "Loki HTTP"
-        type     = "http"
-        path     = "/ready"
-        interval = "5s"
-        timeout  = "5s"
-      }
+      # check {
+      #   name     = "Loki HTTP"
+      #   type     = "http"
+      #   path     = "/ready"
+      #   interval = "5s"
+      #   timeout  = "5s"
+      # }
     }
 
     task "loki" {
