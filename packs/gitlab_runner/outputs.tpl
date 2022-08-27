@@ -1,0 +1,1 @@
+Congrats! You deployed a gitlab Runner on Nomad.
